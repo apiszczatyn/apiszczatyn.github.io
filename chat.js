@@ -1,9 +1,13 @@
 document.addEventListener("DOMContentLoaded", function() {
+    
     const firebaseConfig = {
-        apiKey: "Your-API-Key", // Uzupełnij swoje dane
-        authDomain: "Your-Project-ID.firebaseapp.com",
-        projectId: "Your-Project-ID"
-    };
+        apiKey: "AIzaSyBro3r5rnV2a_OISkDIJl8j29_pJoNaUpA",
+        authDomain: "platformytechproj.firebaseapp.com",
+        projectId: "platformytechproj",
+        storageBucket: "platformytechproj.appspot.com",
+        messagingSenderId: "228981655855",
+        appId: "1:228981655855:web:6c969ec4c8048e1fc439da"
+      };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
