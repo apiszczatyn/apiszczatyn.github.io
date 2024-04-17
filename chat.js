@@ -1,77 +1,67 @@
-document.addEventListener("DOMContentLoaded", function() {
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyBro3r5rnV2a_OISkDIJl8j29_pJoNaUpA",
-        authDomain: "platformytechproj.firebaseapp.com",
-        projectId: "platformytechproj",
-        storageBucket: "platformytechproj.appspot.com",
-        messagingSenderId: "228981655855",
-        appId: "1:228981655855:web:6c969ec4c8048e1fc439da"
-      };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+document.addEventListener("DOMContentLoaded", function() {
     const peer = new Peer();
 
-    let myId = null;
-    let myNickname = null;
-    let conn = null;
-
     peer.on('open', id => {
-        myId = id;
+        document.getElementById('my-id').value = `${id}`;
     });
 
-    document.getElementById('enter').addEventListener('click', function() {
-        myNickname = document.getElementById('nickname').value;
-        if (!myNickname) {
-            alert("Please enter a nickname.");
-            return;
-        }
-        db.collection("users").doc(myNickname).get().then(doc => {
-            if (doc.exists) {
-                alert("Nickname verified, you can now connect.");
-            } else {
-                db.collection("users").doc(myNickname).set({
-                    peerId: myId
-                }).then(() => {
-                    alert("Nickname registered.");
-                }).catch(error => {
-                    console.error("Error registering nickname: ", error);
-                });
-            }
-        }).catch(error => {
-            console.error("Error checking nickname: ", error);
-        });
-    });
+    let conn; // Keep connection reference for reuse
 
     document.getElementById('connect').addEventListener('click', function() {
-        const connectNick = document.getElementById('connect-nick').value;
-        db.collection("users").doc(connectNick).get().then(doc => {
-            if (doc.exists) {
-                const peerId = doc.data().peerId;
-                conn = peer.connect(peerId);
-                conn.on('open', () => {
-                    document.getElementById('send').addEventListener('click', sendMessage);
-                });
-
-                conn.on('data', data => {
-                    displayMessage(`Friend: ${data}`);
-                });
-            } else {
-                alert("Nickname not found.");
-            }
-        }).catch(error => {
-            console.error("Error connecting to nickname: ", error);
-        });
+        const connectToId = document.getElementById('connect-to').value;
+        conn = peer.connect(connectToId);
+        setupConnectionHandlers();
     });
+
+    peer.on('connection', connection => {
+        conn = connection;
+        setupConnectionHandlers();
+    });
+
+    function setupConnectionHandlers() {
+        conn.on('open', () => {
+            document.getElementById('send').addEventListener('click', sendMessage);
+            document.getElementById('sendFile').addEventListener('click', sendFile);
+        });
+
+        conn.on('data', data => {
+            if (data instanceof ArrayBuffer) {
+                displayFile(data);
+            } else {
+                displayMessage(`Friend: ${data}`);
+            }
+        });
+    }
 
     function sendMessage() {
         const message = document.getElementById('message').value;
-        if (conn && message) {
-            conn.send(message);
-            displayMessage(`Me: ${message}`);
-            document.getElementById('message').value = '';
+        conn.send(message);
+        displayMessage(`Me: ${message}`);
+        clearInput('message');
+    }
+
+    function sendFile() {
+        const file = document.getElementById('file').files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const buffer = event.target.result;
+                conn.send(buffer);
+                displayMessage(`Me: Sent a file (${file.name})`);
+            };
+            reader.readAsArrayBuffer(file);
         }
+    }
+
+    function displayFile(buffer) {
+        const blob = new Blob([buffer], {type: "application/octet-stream"});
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.textContent = 'Download File';
+        anchor.download = 'received_file';
+        document.getElementById('messages').appendChild(anchor);
     }
 
     function displayMessage(message) {
@@ -80,4 +70,17 @@ document.addEventListener("DOMContentLoaded", function() {
         messageParagraph.textContent = message;
         messagesDiv.appendChild(messageParagraph);
     }
+
+    function clearInput(inputId) {
+        document.getElementById(inputId).value = '';
+    }
+
+    function copyButton() {
+        var copyText = document.getElementById("my-id");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value);
+    }
+
+    document.getElementById('copy').addEventListener('click', copyButton);
 });

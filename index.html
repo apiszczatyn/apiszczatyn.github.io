@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +30,7 @@
         label {
             font-weight: bold;
         }
-        input[type="text"] {
+        input[type="text"], input[type="file"] {
             width: calc(100% - 70px);
             padding: 8px;
             border: 1px solid #ccc;
@@ -55,19 +56,28 @@
         p {
             margin: 5px 0;
         }
+        a {
+            display: block;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
     <h2>P2P Chat</h2>
     <div class="container">
         <div class="form-group">
-            <label for="nickname">Your Nickname:</label>
-            <input type="text" id="nickname" size="33">
-            <button id="enter">Enter/Verify</button>
+            <label for="your-id">Your ID: </label>
+            <input type="text" id="my-id" size="33" readonly>
+            <button id="copy">Copy</button>    
         </div>
         <div class="form-group">
-            <label for="connect-nick">Connect to (nickname):</label>
-            <input type="text" id="connect-nick" size="33">
+            <label for="nickname">Your Nickname:</label>
+            <input type="text" id="nickname" size="33">
+            <button id="enter">Enter</button>
+        </div>
+        <div class="form-group">
+            <label for="connect-to">Connect to:</label>
+            <input type="text" id="connect-to" size="33">
             <button id="connect">Connect</button>
         </div>
         <div class="form-group">
@@ -75,12 +85,14 @@
             <input type="text" id="message">
             <button id="send">Send</button>
         </div>
+        <div class="form-group">
+            <label for="file">File:</label>
+            <input type="file" id="file">
+            <button id="sendFile">Send File</button>
+        </div>
         <div id="messages"></div>
     </div>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="chat.js"></script> <!-- Twój skrypt JS -->
+    <script src="chat.js"></script>
 </body>
 </html>
