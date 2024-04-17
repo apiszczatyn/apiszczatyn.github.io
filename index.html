@@ -11,12 +11,10 @@
             padding: 0;
             background-color: #f5f5f5;
         }
-
         h2 {
             text-align: center;
             margin-top: 20px;
         }
-
         .container {
             max-width: 600px;
             margin: 20px auto;
@@ -25,15 +23,12 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
         .form-group {
             margin-bottom: 15px;
         }
-
         label {
             font-weight: bold;
         }
-
         input[type="text"] {
             width: calc(100% - 70px);
             padding: 8px;
@@ -41,7 +36,6 @@
             border-radius: 4px;
             margin-right: 10px;
         }
-
         button {
             padding: 8px 15px;
             background-color: #007bff;
@@ -50,17 +44,14 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
         button:hover {
             background-color: #0056b3;
         }
-
         #messages {
             margin-top: 20px;
             border-top: 1px solid #ccc;
             padding-top: 10px;
         }
-
         p {
             margin: 5px 0;
         }
@@ -70,18 +61,13 @@
     <h2>P2P Chat</h2>
     <div class="container">
         <div class="form-group">
-            <label for="your-id">Your ID: </label>
-            <input type="text" id="my-id" size="33" readonly>
-            <button id="copy">Copy</button>    
-        </div>
-        <div class="form-group">
             <label for="nickname">Your Nickname:</label>
             <input type="text" id="nickname" size="33">
-            <button id="enter">Enter</button>
+            <button id="enter">Enter/Verify</button>
         </div>
         <div class="form-group">
-            <label for="connect-to">Connect to:</label>
-            <input type="text" id="connect-to" size="33">
+            <label for="connect-nick">Connect to (nickname):</label>
+            <input type="text" id="connect-nick" size="33">
             <button id="connect">Connect</button>
         </div>
         <div class="form-group">
@@ -91,67 +77,10 @@
         </div>
         <div id="messages"></div>
     </div>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.0/firebase-firestore.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const peer = new Peer();
-
-            peer.on('open', id => {
-                document.getElementById('my-id').value = `${id}`;
-            });
-
-            document.getElementById('connect').addEventListener('click', function() {
-                const connectToId = document.getElementById('connect-to').value;
-                const conn = peer.connect(connectToId);
-                conn.on('open', () => {
-                    document.getElementById('send').addEventListener('click', function() {
-                        const message = document.getElementById('message').value;
-                        conn.send(message);
-                        displayMessage(`Me: ${message}`);
-                        clearInput('message');
-                    });
-                });
-
-                conn.on('data', data => {
-                    displayMessage(`Friend: ${data}`);
-                });
-            });
-
-            peer.on('connection', conn => {
-                conn.on('data', data => {
-                    displayMessage(`Friend: ${data}`);
-                });
-
-                conn.on('open', () => {
-                    document.getElementById('send').addEventListener('click', function() {
-                        const message = document.getElementById('message').value;
-                        conn.send(message);
-                        displayMessage(`Me: ${message}`);
-                        clearInput('message');
-                    });
-                });
-            });
-
-            function displayMessage(message) {
-                const messagesDiv = document.getElementById('messages');
-                const messageParagraph = document.createElement('p');
-                messageParagraph.textContent = message;
-                messagesDiv.appendChild(messageParagraph);
-            }
-
-            function copyButton() {
-                var copyText = document.getElementById("my-id");
-                copyText.select();
-                copyText.setSelectionRange(0, 99999);
-                navigator.clipboard.writeText(copyText.value);
-            }
-
-            function clearInput(inputId) {
-                document.getElementById(inputId).value = '';
-            }
-
-            document.getElementById('copy').addEventListener('click', copyButton);
-        });
-    </script>
+    <script src="chat.js"></script> <!-- Twój skrypt JS -->
 </body>
 </html>
