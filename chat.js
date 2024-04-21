@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function sendMessage(conn) {
         const message = document.getElementById('message').value;
-        if (conn && conn.open) {
+        if (conn) {
             conn.send(message);
             displayMessage(`Me: ${message}`);
             clearInput('message');
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function sendFile(conn) {
         const file = document.getElementById('file').files[0];
-        if (file && conn && conn.open) {
+        if (file && conn ) {
             const reader = new FileReader();
             reader.onload = function(event) {
                 const buffer = event.target.result;
