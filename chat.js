@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let conn; // Keep connection reference for reuse
 
     peer.on('open', id => {
-        document.getElementById('my-id').value = id;
+        document.getElementById('my-id').value =`${id}`;
     });
 
     document.getElementById('connect').addEventListener('click', function() {
