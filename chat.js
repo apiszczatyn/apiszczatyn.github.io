@@ -1,28 +1,25 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     const peer = new Peer();
+    let conn; // Keep connection reference for reuse
 
     peer.on('open', id => {
-        document.getElementById('my-id').value = `${id}`;
+        document.getElementById('my-id').value = id;
     });
-
-    let conn; // Keep connection reference for reuse
 
     document.getElementById('connect').addEventListener('click', function() {
         const connectToId = document.getElementById('connect-to').value;
         conn = peer.connect(connectToId);
-        setupConnectionHandlers();
+        setupConnectionHandlers(conn);
     });
 
     peer.on('connection', connection => {
         conn = connection;
-        setupConnectionHandlers();
+        setupConnectionHandlers(conn);
     });
 
-    function setupConnectionHandlers() {
+    function setupConnectionHandlers(conn) {
         conn.on('open', () => {
-            document.getElementById('send').addEventListener('click', sendMessage);
-            document.getElementById('sendFile').addEventListener('click', sendFile);
+            console.log("Connection established.");
         });
 
         conn.on('data', data => {
@@ -34,16 +31,23 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    function sendMessage() {
+    document.getElementById('send').addEventListener('click', () => sendMessage(conn));
+    document.getElementById('sendFile').addEventListener('click', () => sendFile(conn));
+
+    function sendMessage(conn) {
         const message = document.getElementById('message').value;
-        conn.send(message);
-        displayMessage(`Me: ${message}`);
-        clearInput('message');
+        if (conn && conn.open) {
+            conn.send(message);
+            displayMessage(`Me: ${message}`);
+            clearInput('message');
+        } else {
+            console.log('Connection is closed.');
+        }
     }
 
-    function sendFile() {
+    function sendFile(conn) {
         const file = document.getElementById('file').files[0];
-        if (file) {
+        if (file && conn && conn.open) {
             const reader = new FileReader();
             reader.onload = function(event) {
                 const buffer = event.target.result;
@@ -51,6 +55,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 displayMessage(`Me: Sent a file (${file.name})`);
             };
             reader.readAsArrayBuffer(file);
+        } else {
+            console.log('No file selected or connection is closed.');
         }
     }
 
@@ -75,12 +81,12 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById(inputId).value = '';
     }
 
+    document.getElementById('copy').addEventListener('click', copyButton);
+
     function copyButton() {
         var copyText = document.getElementById("my-id");
         copyText.select();
         copyText.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(copyText.value);
     }
-
-    document.getElementById('copy').addEventListener('click', copyButton);
 });
