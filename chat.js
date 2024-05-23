@@ -93,4 +93,26 @@ document.addEventListener("DOMContentLoaded", function() {
         copyText.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(copyText.value);
     }
+    document.getElementById('start-video-call').addEventListener('click', function() {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+            document.getElementById('local-video').srcObject = stream;
+    
+            // Use existing connection to start a video call
+            const call = peer.call(conn.peer, stream); // Start a video call
+            call.on('stream', remoteStream => {
+                document.getElementById('remote-video').srcObject = remoteStream;
+            });
+    
+            call.on('error', function(err) {
+                console.log('Failed to get local stream', err);
+            });
+        })
+        .catch(error => {
+            console.error('Error accessing media devices:', error);
+        });
+    });
+    
+
+    
 });
