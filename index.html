@@ -61,17 +61,24 @@
             margin-top: 5px;
         }
         #local-video {
-        width: 30%;
-        position: absolute;
+        width: 20%; /* Zmniejszona szerokość lokalnego wideo */
+        height: auto; /* Auto height to maintain aspect ratio */
+        position: fixed; /* Changed from absolute to fixed */
         bottom: 10px;
         right: 10px;
-        border: 1px solid black;
-        }
+        border: 1px solid #ccc; /* Lighter border for cleaner look */
+        border-radius: 8px; /* Rounded corners for the video */
+        z-index: 2; /* Make sure local video is above remote video */
+    }
 
-        #remote-video {
-        width: 100%;
-        height: auto;
-        }
+    #remote-video {
+        width: 100%; /* Full width */
+        height: 100vh; /* Full viewport height */
+        position: absolute; /* Full screen position */
+        top: 0;
+        left: 0;
+        z-index: 1; /* Lower than local video */
+    }
     </style>
 </head>
 <body>
