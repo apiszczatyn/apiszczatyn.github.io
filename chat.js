@@ -102,7 +102,28 @@ document.addEventListener("DOMContentLoaded", function() {
         navigator.clipboard.writeText(copyText.value);
     }
 
-    
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+        document.getElementById('local-video').srcObject = stream;
+
+        peer.on('call', call => {
+            call.answer(stream); // Odpowiedz na przychodzące połączenie wideo
+            call.on('stream', remoteStream => {
+                document.getElementById('remote-video').srcObject = remoteStream;
+            });
+        });
+
+        document.getElementById('connect').addEventListener('click', function() {
+            const otherPeerId = document.getElementById('connect-to').value;
+            const call = peer.call(otherPeerId, stream); // Rozpocznij połączenie wideo
+            call.on('stream', remoteStream => {
+                document.getElementById('remote-video').srcObject = remoteStream;
+            });
+        });
+    })
+    .catch(error => {
+        console.error('Error accessing media devices:', error);
+    });
 
     
 });
