@@ -83,25 +83,35 @@ document.addEventListener("DOMContentLoaded", function() {
 
     
     document.getElementById('copy').addEventListener('click', copyButton);
+    
     document.getElementById('start-video').addEventListener('click', function() {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         .then(stream => {
-            document.getElementById('local-video').srcObject = stream;
-
+            const localVideo = document.getElementById('local-video');
+            if (localVideo) {
+                localVideo.srcObject = stream;
+            }
+    
             peer.on('call', call => {
                 call.answer(stream);
                 call.on('stream', remoteStream => {
-                    document.getElementById('remote-video').srcObject = remoteStream;
+                    const remoteVideo = document.getElementById('remote-video');
+                    if (remoteVideo) {
+                        remoteVideo.srcObject = remoteStream;
+                    }
                 });
             });
-
-            document.getElementById('connect').addEventListener('click', function() {
+    
+            document.getElementById('connect').onclick = function() {
                 const connectToId = document.getElementById('connect-to').value;
                 const call = peer.call(connectToId, stream);
                 call.on('stream', remoteStream => {
-                    document.getElementById('remote-video').srcObject = remoteStream;
+                    const remoteVideo = document.getElementById('remote-video');
+                    if (remoteVideo) {
+                        remoteVideo.srcObject = remoteStream;
+                    }
                 });
-            });
+            };
         })
         .catch(error => {
             console.error('Error accessing media devices.', error);
