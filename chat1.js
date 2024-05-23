@@ -81,33 +81,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById(inputId).value = '';
     }
 
-    
     document.getElementById('copy').addEventListener('click', copyButton);
-    document.getElementById('start-video').addEventListener('click', function() {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(stream => {
-            document.getElementById('local-video').srcObject = stream;
-
-            peer.on('call', call => {
-                call.answer(stream);
-                call.on('stream', remoteStream => {
-                    document.getElementById('remote-video').srcObject = remoteStream;
-                });
-            });
-
-            document.getElementById('connect').addEventListener('click', function() {
-                const connectToId = document.getElementById('connect-to').value;
-                const call = peer.call(connectToId, stream);
-                call.on('stream', remoteStream => {
-                    document.getElementById('remote-video').srcObject = remoteStream;
-                });
-            });
-        })
-        .catch(error => {
-            console.error('Error accessing media devices.', error);
-        });
-    });
-    
 
     function copyButton() {
         var copyText = document.getElementById("my-id");
