@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let conn; // Keep connection reference for reuse
 
     peer.on('open', id => {
+        console.log('My peer ID is: ', id);
         document.getElementById('my-id').value =`${id}`;
     });
 
@@ -84,34 +85,39 @@ document.addEventListener("DOMContentLoaded", function() {
     
     document.getElementById('copy').addEventListener('click', copyButton);
     
-      // Prośba o dostęp do lokalnych mediów
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-          const localVideo = document.getElementById('local-video');
-          localVideo.srcObject = stream;
-  
-          // Odpowiedz na przychodzące połączenie wideo.
-          peer.on('call', call => {
-              call.answer(stream); // Odpowiedz za pomocą lokalnego strumienia mediów.
-              call.on('stream', remoteStream => {
-                  const remoteVideo = document.getElementById('remote-video');
-                  remoteVideo.srcObject = remoteStream;
-              });
-          });
-  
-          // Inicjuj połączenie wideo z innym peerem.
-          document.getElementById('connect').addEventListener('click', () => {
-              const otherPeerId = document.getElementById('connect-to').value;
-              const call = peer.call(otherPeerId, stream); // Rozpocznij połączenie z lokalnym strumieniem mediów.
-              call.on('stream', remoteStream => {
-                  const remoteVideo = document.getElementById('remote-video');
-                  remoteVideo.srcObject = remoteStream;
-              });
-          });
-      })
-      .catch(error => {
-          console.error('Error accessing media devices:', error);
-      });
+
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+        const localVideo = document.getElementById('local-video');
+        localVideo.srcObject = stream;
+
+        // Listen for incoming calls
+        peer.on('call', call => {
+            console.log('Received call from:', call.peer);
+            call.answer(stream); // Answer the call with our stream.
+            call.on('stream', remoteStream => {
+                console.log('Received remote stream');
+                const remoteVideo = document.getElementById('remote-video');
+                remoteVideo.srcObject = remoteStream;
+            });
+        });
+
+        // Connect to other peer and start a call
+        document.getElementById('connect').addEventListener('click', () => {
+            const otherPeerId = document.getElementById('connect-to').value;
+            console.log('Calling peer:', otherPeerId);
+            const call = peer.call(otherPeerId, stream);
+            call.on('stream', remoteStream => {
+                console.log('Received remote stream from call');
+                const remoteVideo = document.getElementById('remote-video');
+                remoteVideo.srcObject = remoteStream;
+            });
+        });
+    })
+    .catch(error => {
+        console.error('Error accessing media devices:', error);
+    });
     
 
     function copyButton() {
