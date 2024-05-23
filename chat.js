@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const peer = new Peer();
     let conn; // Keep connection reference for reuse
 
+    document.getElementById('go-to-video-chat').addEventListener('click', function() {
+        window.location.href = 'video_chat.html'; // Path to the video chat page
+    });
+
     peer.on('open', id => {
         console.log('My peer ID is: ', id);
         document.getElementById('my-id').value =`${id}`;
@@ -12,6 +16,8 @@ document.addEventListener("DOMContentLoaded", function() {
         conn = peer.connect(connectToId);
         setupConnectionHandlers(conn);
     });
+
+
 
     peer.on('connection', connection => {
         conn = connection;
@@ -31,6 +37,8 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+
 
     document.getElementById('send').addEventListener('click', () => sendMessage(conn));
     document.getElementById('sendFile').addEventListener('click', () => sendFile(conn));
