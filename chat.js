@@ -84,40 +84,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     
     document.getElementById('copy').addEventListener('click', copyButton);
-    
 
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-        const localVideo = document.getElementById('local-video');
-        localVideo.srcObject = stream;
-
-        // Listen for incoming calls
-        peer.on('call', call => {
-            console.log('Received call from:', call.peer);
-            call.answer(stream); // Answer the call with our stream.
-            call.on('stream', remoteStream => {
-                console.log('Received remote stream');
-                const remoteVideo = document.getElementById('remote-video');
-                remoteVideo.srcObject = remoteStream;
-            });
-        });
-
-        // Connect to other peer and start a call
-        document.getElementById('connect').addEventListener('click', () => {
-            const otherPeerId = document.getElementById('connect-to').value;
-            console.log('Calling peer:', otherPeerId);
-            const call = peer.call(otherPeerId, stream);
-            call.on('stream', remoteStream => {
-                console.log('Received remote stream from call');
-                const remoteVideo = document.getElementById('remote-video');
-                remoteVideo.srcObject = remoteStream;
-            });
-        });
-    })
-    .catch(error => {
-        console.error('Error accessing media devices:', error);
-    });
     
 
     function copyButton() {
