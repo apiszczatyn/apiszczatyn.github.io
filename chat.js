@@ -84,30 +84,34 @@ document.addEventListener("DOMContentLoaded", function() {
     
     document.getElementById('copy').addEventListener('click', copyButton);
     
-    document.getElementById('start-video').addEventListener('click', function() {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(stream => {
-            document.getElementById('local-video').srcObject = stream;
-    
-            peer.on('call', call => {
-                call.answer(stream);
-                call.on('stream', remoteStream => {
-                    document.getElementById('remote-video').srcObject = remoteStream;
-                });
-            });
-    
-            document.getElementById('connect').onclick = function() {
-                const connectToId = document.getElementById('connect-to').value;
-                const call = peer.call(connectToId, stream);
-                call.on('stream', remoteStream => {
-                    document.getElementById('remote-video').srcObject = remoteStream;
-                });
-            };
-        })
-        .catch(error => {
-            console.error('Error accessing media devices.', error);
-        });
-    });
+      // Prośba o dostęp do lokalnych mediów
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+          const localVideo = document.getElementById('local-video');
+          localVideo.srcObject = stream;
+  
+          // Odpowiedz na przychodzące połączenie wideo.
+          peer.on('call', call => {
+              call.answer(stream); // Odpowiedz za pomocą lokalnego strumienia mediów.
+              call.on('stream', remoteStream => {
+                  const remoteVideo = document.getElementById('remote-video');
+                  remoteVideo.srcObject = remoteStream;
+              });
+          });
+  
+          // Inicjuj połączenie wideo z innym peerem.
+          document.getElementById('connect').addEventListener('click', () => {
+              const otherPeerId = document.getElementById('connect-to').value;
+              const call = peer.call(otherPeerId, stream); // Rozpocznij połączenie z lokalnym strumieniem mediów.
+              call.on('stream', remoteStream => {
+                  const remoteVideo = document.getElementById('remote-video');
+                  remoteVideo.srcObject = remoteStream;
+              });
+          });
+      })
+      .catch(error => {
+          console.error('Error accessing media devices:', error);
+      });
     
 
     function copyButton() {
