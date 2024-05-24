@@ -8,11 +8,7 @@ navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     .then(stream => {
         myVideo.srcObject = stream;
 
-        const peer = new Peer(undefined, {
-            host: 'peerjs-server.herokuapp.com', 
-            secure: true, 
-            port: 443
-        });
+        const peer = new Peer()
 
         peer.on('open', id => {
             myIdDisplay.textContent = id;
