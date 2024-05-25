@@ -1,98 +1,141 @@
 document.addEventListener("DOMContentLoaded", function() {
     const peer = new Peer();
-    let conn; // Referencja do połączenia tekstowego
-    let mediaStream = null; // Referencja do strumienia wideo
+    let conn; // Keep connection reference for reuse
+    let connections = []; // Array to track active connections
 
-    const myVideo = document.getElementById('my-video');
-    const remoteVideo = document.getElementById('remote-video');
-    const videoContainer = document.getElementById('video-container');
-    const closeVideoButton = document.getElementById('close-video');
-
-    // Przechwytywanie mediów wideo i audio
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-        mediaStream = stream;
-        myVideo.srcObject = stream;
-
-        peer.on('call', call => {
-            call.answer(stream);
-            call.on('stream', remoteStream => {
-                remoteVideo.srcObject = remoteStream;
-            });
-        });
-    })
-    .catch(error => {
-        console.error('Nie udało się uzyskać dostępu do kamery: ', error);
-    });
-
-    // Otwarcie połączenia z innym peerem
     peer.on('open', id => {
-        document.getElementById('my-id').value = id;
+        document.getElementById('my-id').value = `${id}`;
     });
 
-    // Przyjmowanie połączeń tekstowych
+    document.getElementById('connect').addEventListener('click', function() {
+        if (connections.length >= 1) {
+            displayMessage("Cannot connect: You can't connect to more than one user.");
+            return;
+        }
+        const connectToId = document.getElementById('connect-to').value;
+        conn = peer.connect(connectToId);
+        setupConnectionHandlers(conn);
+    });
+
     peer.on('connection', connection => {
+        if (connections.length >= 1) {
+            console.log('Incoming connection from', connection.peer, 'rejected: Limit of two connections reached');
+            connection.close();
+            return;
+        }
         conn = connection;
         setupConnectionHandlers(conn);
     });
 
-    // Funkcja do obsługi połączeń tekstowych
     function setupConnectionHandlers(conn) {
+        if (connections.length >= 1) {
+            console.log('Cannot setup connection: Limit of two connections reached');
+            displayMessage("Cannot setup connection: Limit of two connections reached");
+            conn.close();
+            return;
+        }
+        connections.push(conn);
+        updateActiveConnections();
+
         conn.on('open', () => {
-            console.log("Connection established.");
+            console.log("Connection established with", conn.peer);
         });
 
         conn.on('data', data => {
-            displayMessage(`Friend: ${data}`);
+            if (data instanceof ArrayBuffer) {
+                displayFile(data);
+            } else {
+                displayMessage(`Friend: ${data}`);
+            }
+        });
+
+        conn.on('close', () => {
+            connections = connections.filter(c => c !== conn);
+            updateActiveConnections();
+            console.log('Connection closed with', conn.peer);
+        });
+
+        conn.on('error', err => {
+            connections = connections.filter(c => c !== conn);
+            updateActiveConnections();
+            console.error('Connection error with', conn.peer, ':', err);
         });
     }
 
-    // Wysyłanie wiadomości tekstowych
-    document.getElementById('send').addEventListener('click', () => {
+    document.getElementById('send').addEventListener('click', () => sendMessage(conn));
+    document.getElementById('sendFile').addEventListener('click', () => sendFile(conn));
+
+    function sendMessage(conn) {
         const message = document.getElementById('message').value;
-        if (conn) {
+        if (conn && conn.open) {
             conn.send(message);
             displayMessage(`Me: ${message}`);
-            document.getElementById('message').value = '';
+            clearInput('message');
         } else {
             console.log('Connection is closed.');
         }
-    });
+    }
 
-    // Inicjalizacja połączenia wideo
-    document.getElementById('connect').addEventListener('click', function() {
-        const otherPeerId = document.getElementById('connect-to').value;
-        if (!conn) {
-            conn = peer.connect(otherPeerId);
-            setupConnectionHandlers(conn);
+    function sendFile(conn) {
+        const file = document.getElementById('file').files[0];
+        if (file && conn && conn.open) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const buffer = event.target.result;
+                conn.send(buffer);
+                displayMessage(`Me: Sent a file (${file.name})`);
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            console.log('No file selected or connection is closed.');
         }
+    }
 
-        const call = peer.call(otherPeerId, mediaStream);
-        call.on('stream', remoteStream => {
-            remoteVideo.srcObject = remoteStream;
-            videoContainer.style.display = 'block'; // Pokazanie wideo
-        });
-    });
+    function displayFile(buffer) {
+        const blob = new Blob([buffer], {type: "application/octet-stream"});
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.textContent = 'Download File';
+        anchor.download = 'received_file';
+        document.getElementById('messages').appendChild(anchor);
+    }
 
-    // Zamknięcie wideo i powrót do czatu tekstowego
-    closeVideoButton.addEventListener('click', () => {
-        videoContainer.style.display = 'none'; // Ukrycie wideo
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(track => track.stop()); // Zatrzymaj strumień
-        }
-        // Ponownie inicjuje przechwytywanie mediów
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(stream => {
-            mediaStream = stream;
-            myVideo.srcObject = stream;
-        });
-    });
-
-    // Funkcja do wyświetlania wiadomości w oknie czatu
     function displayMessage(message) {
         const messagesDiv = document.getElementById('messages');
         const messageParagraph = document.createElement('p');
         messageParagraph.textContent = message;
         messagesDiv.appendChild(messageParagraph);
     }
+
+
+
+    function updateActiveConnections() {
+        const activeConnectionsDiv = document.getElementById('active-connections');
+        activeConnectionsDiv.innerHTML = ''; // Clear existing connections
+
+        connections.forEach((conn, index) => {
+            const connParagraph = document.createElement('p');
+            connParagraph.textContent = `Connection ${index + 1}: ${conn.peer}`;
+            activeConnectionsDiv.appendChild(connParagraph);
+        });
+    }
+
+    document.getElementById('copy').addEventListener('click', copyButton);
+
+    function copyButton() {
+        var copyText = document.getElementById("my-id");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value);
+    }
+    
+    var enterButton = document.getElementById('enterButton');
+    var welcomeOverlay = document.getElementById('welcomePage');
+    var chatPage = document.getElementById('chatPage');
+
+    enterButton.addEventListener('click', function () {
+        welcomeOverlay.classList.add('hidden');
+        chatPage.classList.remove('hidden');
+    });
 });
