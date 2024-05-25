@@ -13,12 +13,13 @@
             height: 100%;
             width: 100%;
             box-sizing: border-box;
+            overflow: hidden; /* Prevent double scrollbar issue */
         }
         *, *::before, *::after {
-                box-sizing: inherit;
+            box-sizing: inherit;
         }
         .container {
-            margin: 30px ;
+            margin: 30px;
             padding: 30px;
             background-color: #e8e8e8;
             border-radius: 10px;
@@ -27,14 +28,17 @@
             flex-wrap: wrap;
             height: calc(100% - 60px);
             width: calc(100% - 60px);
-            overflow: auto;
+            overflow: auto; /* Enable scrolling */
         }
         /* welcome screen */
         .overlay {
             position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             z-index: 1000;
+            overflow: auto; /* Enable scrolling */
         }
         .welcomePageMain {
             flex: 1 1 50%;
@@ -100,7 +104,6 @@
             margin-top: 5px;
         }
     </style>
-
 </head>
 <body>
     <div id="welcomePage" class="overlay">
@@ -122,6 +125,8 @@
                     <input type="text" id="connect-to" size="20">
                     <button id="connect">connect</button>
                 </p>
+                    <h3>Active Connections</h3>
+                    <div id="active-connections"></div>
                 <button id="enterButton">enter chat</button>
             </div>
             <div class="welcomePageLogo">
@@ -148,11 +153,9 @@
                 <h3>Messages</h3>
                 <div id="messages"></div>
             </div>
-            <div>
-                <h3>Active Connections</h3>
-                <div id="active-connections"></div>
-            </div>
+
         </div>
+    </div>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="chat.js"></script>
 </body>
