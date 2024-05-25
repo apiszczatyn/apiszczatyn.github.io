@@ -98,6 +98,20 @@
             display: block;
             margin-top: 5px;
         }
+        #video-container {
+            display: none; /* początkowo ukryte */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000; /* Nad pozostałą zawartością */
+        }
+        video {
+            width: 100%;
+            height: auto;
+        }
     </style>
 
 </head>
@@ -151,6 +165,11 @@
                 <h3>Active Connections</h3>
                 <div id="active-connections"></div>
             </div>
+        </div>
+        <div id="video-container">
+            <video id="my-video" autoplay muted></video>
+            <video id="remote-video" autoplay></video>
+            <button id="close-video">Close Video Chat</button>
         </div>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="chat.js"></script>
