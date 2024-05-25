@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,29 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>P2P Chat</title>
     <style>
-        body {
+        body, html {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            background-color: #222;
+            height: 100%;
+            width: 100%;
+            box-sizing: border-box;
         }
-        h2 {
-            text-align: center;
-            margin-top: 20px;
+        *, *::before, *::after {
+                box-sizing: inherit;
         }
         .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
+            margin: 30px ;
+            padding: 30px;
+            background-color: #e8e8e8;
+            border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            height: calc(100% - 60px);
+            width: calc(100% - 60px);
+        }
+        /* welcome screen */
+        .overlay {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
+        .welcomePageMain {
+            flex: 1 1 50%;
+            box-sizing: border-box;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .welcomePageLogo {
+            flex: 1 1 50%;
+            box-sizing: border-box;
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        @media (max-width: 1000px) {
+            .welcomePageMain, .welcomePageLogo {
+                flex: 1 1 100%;
+            }
+            .welcomePageLogo {
+                order: -1;
+            }
+        }
+        #logo {
+            width: 60%;
+        }
+        /* chat screen */
+        .hidden {
+            display: none;
         }
         .form-group {
             margin-bottom: 15px;
-        }
-        label {
-            font-weight: bold;
         }
         input[type="text"], input[type="file"] {
             width: calc(100% - 70px);
@@ -39,60 +80,78 @@
         }
         button {
             padding: 8px 15px;
-            background-color: #007bff;
+            background-color: #5271FF;
             color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #3050dd;
         }
         #messages {
             margin-top: 20px;
             border-top: 1px solid #ccc;
             padding-top: 10px;
         }
-        p {
-            margin: 5px 0;
-        }
         a {
             display: block;
             margin-top: 5px;
         }
-
     </style>
+
 </head>
 <body>
-    <h2>P2P Chat</h2>
-    <div class="container">
-        <div class="form-group">
-            <button id="go-to-video-chat">Go to Video Chat</button>
-        </div>  
-        <div class="form-group">
-            <label for="your-id">Your ID: </label>
-            <input type="text" id="my-id" size="33" readonly>
-            <button id="copy">Copy</button>    
+    <div id="welcomePage" class="overlay">
+        <div class="container">
+            <div class="welcomePageMain">
+                <p>
+                    <span style="font-size: 72px;">welcome to </span><br>
+                    <span style="font-size: 72px; font-weight: bold; color: #5271FF">P2Pmsngr.</span>
+                </p>
+                <p>
+                    <span style="font-size: 16px; font-style: italic;">your ID:</span>
+                    <label for="your-id"></label>
+                    <input type="text" id="my-id" size="25" readonly>
+                    <button id="copy">copy</button> 
+                </p>
+                <p>
+                    <span style="font-size: 16px; font-style: italic;">connect to:</span>
+                    <label for="connect-to"></label>
+                    <input type="text" id="connect-to" size="20">
+                    <button id="connect">connect</button>
+                </p>
+                <button id="enterButton">enter chat</button>
+            </div>
+            <div class="welcomePageLogo">
+                <img id="logo" src="logo.png" alt="logo">
+            </div>
         </div>
-        <div class="form-group">
-            <label for="connect-to">Connect to:</label>
-            <input type="text" id="connect-to" size="33">
-            <button id="connect">Connect</button>
-        </div>
-        <div class="form-group">
-            <label for="message">Your message:</label>
-            <input type="text" id="message">
-            <button id="send">Send</button>
-        </div>
-        <div class="form-group">
-            <label for="file">File:</label>
-            <input type="file" id="file">
-            <button id="sendFile">Send File</button>
-        </div>
-    <div id="messages"></div>
-
-    
     </div>
+    <div id="chatPage" class="hidden">
+        <div class="container">
+            <div class="form-group">
+                <button id="go-to-video-chat">Go to Video Chat</button>
+            </div>  
+            <div class="form-group">
+                <label for="message">Your message:</label>
+                <input type="text" id="message">
+                <button id="send">Send</button>
+            </div>
+            <div class="form-group">
+                <label for="file">File:</label>
+                <input type="file" id="file">
+                <button id="sendFile">Send File</button>
+            </div>
+            <div>
+                <h3>Messages</h3>
+                <div id="messages"></div>
+            </div>
+            <div>
+                <h3>Active Connections</h3>
+                <div id="active-connections"></div>
+            </div>
+        </div>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="chat.js"></script>
 </body>
