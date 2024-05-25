@@ -2,14 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const peer = new Peer();
     let conn; // Keep connection reference for reuse
 
-    var enterButton = document.getElementById('enterButton');
-    var welcomeOverlay = document.getElementById('welcomePage');
-    var chatPage = document.getElementById('chatPage');
 
-    enterButton.addEventListener('click', function () {
-        welcomeOverlay.classList.add('hidden');
-        chatPage.classList.remove('hidden');
-    });
 
     document.getElementById('go-to-video-chat').addEventListener('click', function() {
         window.location.href = 'video_chat.html'; // Path to the video chat page
@@ -134,5 +127,13 @@ document.addEventListener("DOMContentLoaded", function() {
         console.error('Error accessing media devices:', error);
     });
 
-    
+    var enterButton = document.getElementById('enterButton');
+    var welcomeOverlay = document.getElementById('welcomePage');
+    var chatPage = document.getElementById('chatPage');
+
+    enterButton.addEventListener('click', function () {
+        welcomeOverlay.classList.add('hidden');
+        chatPage.classList.remove('hidden');
+    });
+
 });
