@@ -130,6 +130,12 @@ document.addEventListener("DOMContentLoaded", function() {
         navigator.clipboard.writeText(copyText.value);
     }
     
+    var videoButton = document.getElementById('go-to-video-chat');
+
+    videoButton.addEventListener('click', function(){
+        window.location.href = 'video_chat.html';
+    });
+
     var enterButton = document.getElementById('enterButton');
     var welcomeOverlay = document.getElementById('welcomePage');
     var chatPage = document.getElementById('chatPage');
