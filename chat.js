@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (!data.endOfFile) {
                     receivedBuffers.push(data.data);
                     receivedSize += data.data.byteLength;
-                    displayMessage(`Receiving ${data.filename}...`);
+                    //displayMessage(`Receiving ${data.filename}...`);
                 } else {
                     const totalArrayBuffer = new Uint8Array(receivedSize),
                           view = new Uint8Array(data.data);
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const anchor = document.createElement('a');
         anchor.href = url;
         anchor.download = filename;
-        anchor.textContent = `Download ${filename}`;
+        anchor.textContent = `Friend: Download ${filename}`;
         document.getElementById('messages').appendChild(anchor);
     }
 
