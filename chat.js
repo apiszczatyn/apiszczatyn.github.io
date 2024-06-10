@@ -43,9 +43,9 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("Connection established with", conn.peer);
         });
 
-        conn.on('data', data => {
-            if (data instanceof ArrayBuffer) {
-                displayFile(data);
+        conn.on('data', function(data) {
+            if (data.type === 'file') {
+                displayFile(data.data, data.filename);
             } else {
                 displayMessage(`Friend: ${data}`);
             }
@@ -79,27 +79,40 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function sendFile(conn) {
-        const file = document.getElementById('file').files[0];
-        if (file && conn && conn.open) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const buffer = event.target.result;
-                conn.send(buffer);
-                displayMessage(`Me: Sent a file (${file.name})`);
-            };
-            reader.readAsArrayBuffer(file);
-        } else {
-            console.log('No file selected or connection is closed.');
+        const fileInput = document.getElementById('file');
+        if (!fileInput.files.length) {
+            console.log('No file selected.');
+            return;
         }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+    
+        reader.onload = function(event) {
+            const buffer = event.target.result;
+            if (conn && conn.open) {
+                conn.send({type: 'file', data: buffer, filename: file.name});
+                displayMessage(`Me: Sent a file (${file.name})`);
+            } else {
+                console.log('Connection is closed.');
+            }
+        };
+    
+        reader.onerror = function(err) {
+            console.error('File reading error:', err);
+        };
+    
+        reader.readAsArrayBuffer(file);
     }
+    
 
-    function displayFile(buffer) {
-        const blob = new Blob([buffer], {type: "application/octet-stream"});
+    
+    function displayFile(arrayBuffer, filename) {
+        const blob = new Blob([arrayBuffer], {type: "application/octet-stream"});
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.textContent = 'Download File';
-        anchor.download = 'received_file';
+        anchor.download = filename || 'received_file';
+        anchor.textContent = `Download ${filename}`;
         document.getElementById('messages').appendChild(anchor);
     }
 
