@@ -151,18 +151,20 @@ document.addEventListener("DOMContentLoaded", function() {
         chatPage.classList.add('hidden');
         videoPage.classList.remove('hidden');
         welcomeOverlay.classList.add('hidden');
+        startVideoStream();
     });
 
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-        localStream = stream; // Przechowaj lokalny strumień do dalszego wykorzystania
-        myVideo.srcObject = stream; // Wyświetl lokalne wideo
-    })
-    .catch(error => {
-        console.error('Nie udało się uzyskać dostępu do kamery: ', error);
-    });
-
+    function startVideoStream() {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+            localStream = stream; // Save the local stream for re-use
+            document.getElementById('my-video').srcObject = stream; // Display local video
+            setupCall(); // Function to set up the video call
+        })
+        .catch(error => {
+            console.error('Nie udało się uzyskać dostępu do kamery: ', error);
+        });
+    }
 
     connectButton.addEventListener('click', () => {
         const call = peer.call(document.getElementById('connect-to').value, localStream);
