@@ -2,7 +2,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const peer = new Peer();
     let conn; // Keep connection reference for reuse
     let connections = []; // Array to track active connections
-
+    let receivedBuffers = [];
+    let receivedSize = 0;
+    
 
     peer.on('open', id => {
         document.getElementById('my-id').value = `${id}`;
@@ -45,7 +47,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
         conn.on('data', function(data) {
             if (data.type === 'file') {
-                displayFile(data.data, data.filename);
+                if (!data.endOfFile) {
+                    receivedBuffers.push(data.data);
+                    receivedSize += data.data.byteLength;
+                    displayMessage(`Receiving ${data.filename}...`);
+                } else {
+                    const totalArrayBuffer = new Uint8Array(receivedSize),
+                          view = new Uint8Array(data.data);
+                    let pos = 0;
+                    for (let buffer of receivedBuffers) {
+                        totalArrayBuffer.set(new Uint8Array(buffer), pos);
+                        pos += buffer.byteLength;
+                    }
+                    totalArrayBuffer.set(view, pos); // add the last chunk
+                    displayFile(new Blob([totalArrayBuffer], {type: data.filetype}), data.filename);
+                    receivedBuffers = [];
+                    receivedSize = 0;
+                }
             } else {
                 displayMessage(`Friend: ${data}`);
             }
@@ -85,33 +103,42 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         const file = fileInput.files[0];
-        const reader = new FileReader();
+        const chunkSize = 16 * 1024; // 16 KB per chunk
+        let offset = 0;
     
-        reader.onload = function(event) {
-            const buffer = event.target.result;
-            if (conn && conn.open) {
-                conn.send({type: 'file', data: buffer, filename: file.name});
-                displayMessage(`Me: Sent a file (${file.name})`);
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            conn.send({
+                type: 'file',
+                filename: file.name,
+                filetype: file.type,
+                data: e.target.result
+            });
+            offset += e.target.result.byteLength;
+            if (offset < file.size) {
+                readSlice(offset);
             } else {
-                console.log('Connection is closed.');
+                conn.send({type: 'file', filename: file.name, filetype: file.type, endOfFile: true});
+                displayMessage(`Me: Sent a file (${file.name})`);
             }
         };
-    
         reader.onerror = function(err) {
             console.error('File reading error:', err);
         };
     
-        reader.readAsArrayBuffer(file);
+        const readSlice = o => {
+            const slice = file.slice(o, o + chunkSize);
+            reader.readAsArrayBuffer(slice);
+        };
+    
+        readSlice(0);
     }
     
-
-    
-    function displayFile(arrayBuffer, filename) {
-        const blob = new Blob([arrayBuffer], {type: "application/octet-stream"});
+    function displayFile(blob, filename) {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = filename || 'received_file';
+        anchor.download = filename;
         anchor.textContent = `Download ${filename}`;
         document.getElementById('messages').appendChild(anchor);
     }
