@@ -139,8 +139,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     var myVideo = document.getElementById('my-video');
     var remoteVideo = document.getElementById('remote-video');
-    var myIdDisplay = document.getElementById('my-id');
-    var remoteIdInput = document.getElementById('remote-id');
     var connectButton = document.getElementById('connect-button');
     var closeButton = document.getElementById('closeCall')
 
@@ -174,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     peer.on('call', call => {
-        call.answer(stream);
+        call.answer(localStream);
         call.on('stream', remoteStream => {
             remoteVideo.srcObject = remoteStream;
         });
