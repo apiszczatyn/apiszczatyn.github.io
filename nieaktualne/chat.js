@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let conn; // Keep connection reference for reuse
     let connections = []; // Array to track active connections
 
-
     peer.on('open', id => {
         document.getElementById('my-id').value = `${id}`;
     });
@@ -17,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function() {
         conn = peer.connect(connectToId);
         setupConnectionHandlers(conn);
     });
-
 
     peer.on('connection', connection => {
         if (connections.length >= 1) {
@@ -131,62 +129,19 @@ document.addEventListener("DOMContentLoaded", function() {
         copyText.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(copyText.value);
     }
+    
+    var videoButton = document.getElementById('go-to-video-chat');
+
+    videoButton.addEventListener('click', function(){
+        window.location.href = 'video_chat.html';
+    });
 
     var enterButton = document.getElementById('enterButton');
     var welcomeOverlay = document.getElementById('welcomePage');
     var chatPage = document.getElementById('chatPage');
-    var videoPage = document.getElementById('videoChatPage')
-
-    var myVideo = document.getElementById('my-video');
-    var remoteVideo = document.getElementById('remote-video');
-    var myIdDisplay = document.getElementById('my-id');
-    var remoteIdInput = document.getElementById('remote-id');
-    var connectButton = document.getElementById('connect-button');
-    var closeButton = document.getElementById('closeCall')
 
     enterButton.addEventListener('click', function () {
         welcomeOverlay.classList.add('hidden');
         chatPage.classList.remove('hidden');
-        videoPage.classList.add('hidden');
     });
-    enterVideoChat.addEventListener('click', function (){
-        chatPage.classList.add('hidden');
-        videoPage.classList.remove('hidden');
-        welcomeOverlay.classList.add('hidden');
-    });
-
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-        localStream = stream; // Przechowaj lokalny strumień do dalszego wykorzystania
-        myVideo.srcObject = stream; // Wyświetl lokalne wideo
-    })
-    .catch(error => {
-        console.error('Nie udało się uzyskać dostępu do kamery: ', error);
-    });
-
-
-    connectButton.addEventListener('click', () => {
-        const call = peer.call(document.getElementById('connect-to').value, localStream);
-        call.on('stream', remoteStream => {
-            remoteVideo.srcObject = remoteStream;
-        });
-    });
-
-    peer.on('call', call => {
-        call.answer(stream);
-        call.on('stream', remoteStream => {
-            remoteVideo.srcObject = remoteStream;
-        });
-    })
-    closeButton.addEventListener('click',function(){
-        
-        videoPage.classList.add('hidden');
-        chatPage.classList.remove('hidden');
-        welcomeOverlay.classList.add('hidden');
-        call.close();
-
-    });
-
-   
 });
