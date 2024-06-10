@@ -159,7 +159,6 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(stream => {
             localStream = stream; // Save the local stream for re-use
             document.getElementById('my-video').srcObject = stream; // Display local video
-            setupCall(); // Function to set up the video call
         })
         .catch(error => {
             console.error('Nie udało się uzyskać dostępu do kamery: ', error);
