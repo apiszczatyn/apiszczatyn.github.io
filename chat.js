@@ -181,8 +181,15 @@ document.addEventListener("DOMContentLoaded", function() {
         
         videoPage.classList.add('hidden');
         chatPage.classList.remove('hidden');
-        welcomeOverlay.classList.add('hidden');
-        call.close();
+        if (localStream) {
+            localStream.getTracks().forEach(track => {
+                if (track.kind === 'video' || track.kind === 'audio') {
+                    track.stop(); // Stop the video and audio tracks only
+                }
+            });
+        }
+        document.getElementById('remote-video').srcObject = null;
+        document.getElementById('my-video').srcObject = null;
 
     });
 
